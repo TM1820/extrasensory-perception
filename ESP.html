@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP Card Experiment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F5D042 0%, #0A174E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(10, 23, 78, 0.4);
+        }
+        
+        h1 {
+            color: #0A174E;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 36px;
+        }
+        
+        h2 {
+            color: #0A174E;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0A174E;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #F5D042;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #0A174E;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #F5D042 0%, #d4b032 100%);
+            color: #0A174E;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 208, 66, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            line-height: 1.8;
+            border-left: 5px solid #F5D042;
+        }
+        
+        .instructions ul {
+            margin-left: 25px;
+            margin-top: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .card-display {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .card-back {
+            width: 200px;
+            height: 280px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #0A174E 0%, #1a2d6e 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: #F5D042;
+            box-shadow: 0 10px 30px rgba(10, 23, 78, 0.3);
+            border: 3px solid #F5D042;
+        }
+        
+        .card-revealed {
+            width: 200px;
+            height: 280px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+            box-shadow: 0 10px 30px rgba(10, 23, 78, 0.3);
+            border: 3px solid #0A174E;
+        }
+        
+        .card-revealed .rank {
+            font-size: 60px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .card-revealed .suit {
+            font-size: 80px;
+        }
+        
+        .red-suit {
+            color: #dc2626;
+        }
+        
+        .black-suit {
+            color: #0A174E;
+        }
+        
+        .trial-info {
+            text-align: center;
+            font-size: 20px;
+            margin: 25px 0;
+            color: #0A174E;
+            font-weight: 600;
+        }
+        
+        .response-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .response-buttons button {
+            padding: 20px 50px;
+            font-size: 24px;
+            min-width: 150px;
+        }
+        
+        .btn-red {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+        }
+        
+        .btn-black {
+            background: linear-gradient(135deg, #0A174E 0%, #1a2d6e 100%);
+            color: white;
+        }
+        
+        .confidence-scale {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #F5D042;
+        }
+        
+        .confidence-scale h3 {
+            text-align: center;
+            color: #0A174E;
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+        
+        .confidence-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .confidence-buttons button {
+            width: 70px;
+            height: 70px;
+            padding: 0;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50%;
+        }
+        
+        .confidence-buttons button:hover {
+            transform: scale(1.15);
+        }
+        
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #0A174E;
+            padding: 0 20px;
+            font-weight: 600;
+        }
+        
+        .feedback {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #F5D042;
+        }
+        
+        .feedback h3 {
+            color: #0A174E;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .feedback-correct {
+            background: #dcfce7;
+            border-color: #16a34a;
+        }
+        
+        .feedback-incorrect {
+            background: #fee2e2;
+            border-color: #dc2626;
+        }
+        
+        .centered {
+            text-align: center;
+        }
+        
+        .thank-you {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .thank-you h1 {
+            font-size: 48px;
+            margin-bottom: 25px;
+            color: #0A174E;
+        }
+        
+        .thank-you p {
+            font-size: 20px;
+            color: #333;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F5D042 0%, #0A174E 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .intro-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Page -->
+        <div id="welcomePage" class="page active">
+            <h1>🎴 Extrasensory Perception Study 🎴</h1>
+            <div class="instructions">
+                <h2 style="text-align: center;">Welcome to the ESP Card Experiment</h2>
+                <p class="intro-text">
+                    This study investigates extrasensory perception (ESP) using a scientifically rigorous approach. 
+                    You will attempt to predict the color of playing cards before they are revealed. 
+                    This experiment uses Signal Detection Theory to analyze your perceptual sensitivity 
+                    and response patterns.
+                </p>
+                <p class="intro-text">
+                    The study takes approximately 15-20 minutes to complete. Your data will help us understand 
+                    the nature of intuitive decision-making and perception beyond normal sensory channels.
+                </p>
+            </div>
+            <div class="centered">
+                <button onclick="showPage('participantPage')">Begin Study</button>
+            </div>
+        </div>
+
+        <!-- Participant Details Page -->
+        <div id="participantPage" class="page">
+            <h1>Participant Information</h1>
+            <div class="form-group">
+                <label for="participantId">Participant ID:</label>
+                <input type="text" id="participantId" required placeholder="Enter your ID">
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" min="18" max="100" required placeholder="Enter your age">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" required>
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="espBelief">Do you believe in ESP/psychic abilities?</label>
+                <select id="espBelief" required>
+                    <option value="">Select...</option>
+                    <option value="Strongly believe">Strongly believe</option>
+                    <option value="Somewhat believe">Somewhat believe</option>
+                    <option value="Neutral">Neutral/Unsure</option>
+                    <option value="Somewhat skeptical">Somewhat skeptical</option>
+                    <option value="Strongly skeptical">Strongly skeptical</option>
+                </select>
+            </div>
+            <div class="centered">
+                <button onclick="saveParticipantInfo()">Continue</button>
+            </div>
+        </div>
+
+        <!-- Instructions Page -->
+        <div id="instructionsPage" class="page">
+            <h1>Instructions</h1>
+            <div class="instructions">
+                <h2>How the experiment works:</h2>
+                <ul>
+                    <li>You will complete <b>200 trials</b> in this experiment</li>
+                    <li>In each trial, a playing card will be selected (face down)</li>
+                    <li>Your task: <b>Predict whether the card is RED (Hearts ♥ or Diamonds ♦) or BLACK (Spades ♠ or Clubs ♣)</b></li>
+                    <li>Use your intuition, gut feeling, or any method you prefer to make your prediction</li>
+                    <li>After making your prediction, rate your confidence from 1 (not confident) to 5 (very confident)</li>
+                    <li>The card will then be revealed, showing whether you were correct</li>
+                </ul>
+                
+                <h2 style="margin-top: 25px;">Important Guidelines:</h2>
+                <ul>
+                    <li><b>Trust your intuition</b> - respond with your first impression</li>
+                    <li><b>Be honest with confidence ratings</b> - this helps us understand your decision-making</li>
+                    <li>Try to maintain focus throughout the experiment</li>
+                    <li>There are no right or wrong approaches - just do your best</li>
+                    <li>You can take short breaks between trials if needed</li>
+                </ul>
+                
+                <h2 style="margin-top: 25px;">Statistical Note:</h2>
+                <ul>
+                    <li>By chance alone, you would be expected to get approximately 50% correct (100 out of 200)</li>
+                    <li>We use Signal Detection Theory to analyze sensitivity beyond random guessing</li>
+                </ul>
+            </div>
+            <div class="centered">
+                <button onclick="startExperiment()">Start Experiment</button>
+            </div>
+        </div>
+
+        <!-- Experiment Page -->
+        <div id="experimentPage" class="page">
+            <div class="trial-info">
+                <div id="trialNumber"></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div id="stimulusArea"></div>
+        </div>
+
+        <!-- Thank You Page -->
+        <div id="thankYouPage" class="page">
+            <div class="thank-you">
+                <h1>🌟 Thank You! 🌟</h1>
+                <p>You have completed the ESP Card Experiment.</p>
+                <p style="margin-top: 25px;">Your results have been compiled and are ready for download.</p>
+                <p style="margin-top: 15px; font-size: 16px; color: #666;">
+                    Your data will contribute to our understanding of human perception and decision-making.
+                </p>
+                <button onclick="downloadResults()" style="margin-top: 35px; font-size: 20px; padding: 18px 50px;">
+                    Download Results (CSV)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Experiment configuration
+        const TOTAL_TRIALS = 200;
+        const SIGNAL_TRIALS = 100; // RED cards
+        const NOISE_TRIALS = 100;  // BLACK cards
+        
+        // Card suits
+        const RED_SUITS = ['♥', '♦'];
+        const BLACK_SUITS = ['♠', '♣'];
+        const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        
+        // Experiment state
+        let currentTrial = 0;
+        let participantData = {};
+        let trialResults = [];
+        let trialSequence = [];
+        let currentCard = null;
+        let currentResponse = null;
+        let trialStartTime = 0;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function saveParticipantInfo() {
+            const id = document.getElementById('participantId').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
+            const espBelief = document.getElementById('espBelief').value;
+            
+            if (!id || !age || !gender || !espBelief) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            participantData = { id, age, gender, espBelief };
+            showPage('instructionsPage');
+        }
+
+        function startExperiment() {
+            currentTrial = 0;
+            trialResults = [];
+            generateTrialSequence();
+            showPage('experimentPage');
+            runTrial();
+        }
+
+        function generateTrialSequence() {
+            // Create balanced sequence: 100 RED, 100 BLACK
+            trialSequence = [];
+            
+            // Add RED cards (signals)
+            for (let i = 0; i < SIGNAL_TRIALS; i++) {
+                const suit = RED_SUITS[Math.floor(Math.random() * RED_SUITS.length)];
+                const rank = RANKS[Math.floor(Math.random() * RANKS.length)];
+                trialSequence.push({ color: 'RED', suit, rank, isSignal: true });
+            }
+            
+            // Add BLACK cards (noise)
+            for (let i = 0; i < NOISE_TRIALS; i++) {
+                const suit = BLACK_SUITS[Math.floor(Math.random() * BLACK_SUITS.length)];
+                const rank = RANKS[Math.floor(Math.random() * RANKS.length)];
+                trialSequence.push({ color: 'BLACK', suit, rank, isSignal: false });
+            }
+            
+            // Shuffle the sequence
+            shuffleArray(trialSequence);
+        }
+
+        function runTrial() {
+            if (currentTrial >= TOTAL_TRIALS) {
+                finishExperiment();
+                return;
+            }
+            
+            currentCard = trialSequence[currentTrial];
+            updateTrialInfo();
+            showCard();
+            trialStartTime = Date.now();
+        }
+
+        function updateTrialInfo() {
+            document.getElementById('trialNumber').textContent = 
+                `Trial ${currentTrial + 1} of ${TOTAL_TRIALS}`;
+            
+            const progress = ((currentTrial / TOTAL_TRIALS) * 100).toFixed(0);
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = progress + '%';
+        }
+
+        function showCard() {
+            const area = document.getElementById('stimulusArea');
+            area.innerHTML = `
+                <div class="card-display">
+                    <div class="card-back">🎴</div>
+                    <p style="text-align: center; margin-top: 30px; font-size: 20px; color: #0A174E; font-weight: 600;">
+                        Use your intuition to predict the card color
+                    </p>
+                </div>
+                <div class="response-buttons">
+                    <button class="btn-red" onclick="recordResponse('RED')">RED</button>
+                    <button class="btn-black" onclick="recordResponse('BLACK')">BLACK</button>
+                </div>
+            `;
+        }
+
+        function recordResponse(response) {
+            currentResponse = response;
+            
+            // Remove response buttons
+            const area = document.getElementById('stimulusArea');
+            const buttonDiv = area.querySelector('.response-buttons');
+            if (buttonDiv) {
+                buttonDiv.remove();
+            }
+            
+            // Show confidence scale
+            const confidenceDiv = document.createElement('div');
+            confidenceDiv.className = 'confidence-scale';
+            confidenceDiv.innerHTML = `
+                <h3>How confident are you in your prediction?</h3>
+                <div class="confidence-buttons">
+                    <button onclick="recordConfidence(1)">1</button>
+                    <button onclick="recordConfidence(2)">2</button>
+                    <button onclick="recordConfidence(3)">3</button>
+                    <button onclick="recordConfidence(4)">4</button>
+                    <button onclick="recordConfidence(5)">5</button>
+                </div>
+                <div class="confidence-label">
+                    <span>Not Confident</span>
+                    <span>Very Confident</span>
+                </div>
+            `;
+            area.appendChild(confidenceDiv);
+        }
+
+        function recordConfidence(confidence) {
+            const rt = Date.now() - trialStartTime;
+            const correct = (currentResponse === currentCard.color);
+            const isHit = currentCard.isSignal && currentResponse === 'RED';
+            const isMiss = currentCard.isSignal && currentResponse === 'BLACK';
+            const isFA = !currentCard.isSignal && currentResponse === 'RED';
+            const isCR = !currentCard.isSignal && currentResponse === 'BLACK';
+            
+            trialResults.push({
+                trial: currentTrial + 1,
+                actualColor: currentCard.color,
+                actualSuit: currentCard.suit,
+                actualRank: currentCard.rank,
+                response: currentResponse,
+                correct: correct ? 1 : 0,
+                confidence: confidence,
+                isSignal: currentCard.isSignal ? 1 : 0,
+                hit: isHit ? 1 : 0,
+                miss: isMiss ? 1 : 0,
+                falseAlarm: isFA ? 1 : 0,
+                correctRejection: isCR ? 1 : 0,
+                rt: rt
+            });
+            
+            // Show feedback
+            showFeedback(correct, confidence);
+        }
+
+        function showFeedback(correct, confidence) {
+            const area = document.getElementById('stimulusArea');
+            
+            // Remove confidence scale
+            const confDiv = area.querySelector('.confidence-scale');
+            if (confDiv) {
+                confDiv.remove();
+            }
+            
+            // Show revealed card
+            const cardDisplay = area.querySelector('.card-display');
+            const suitClass = currentCard.color === 'RED' ? 'red-suit' : 'black-suit';
+            cardDisplay.innerHTML = `
+                <div class="card-revealed">
+                    <div class="rank ${suitClass}">${currentCard.rank}</div>
+                    <div class="suit ${suitClass}">${currentCard.suit}</div>
+                </div>
+            `;
+            
+            // Show feedback
+            const feedbackClass = correct ? 'feedback-correct' : 'feedback-incorrect';
+            const feedbackText = correct ? '✓ Correct!' : '✗ Incorrect';
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = `feedback ${feedbackClass}`;
+            feedbackDiv.innerHTML = `
+                <h3>${feedbackText}</h3>
+                <p style="font-size: 18px; color: #0A174E; margin-top: 10px;">
+                    You predicted: <b>${currentResponse}</b> | 
+                    Actual: <b>${currentCard.color}</b> | 
+                    Confidence: <b>${confidence}/5</b>
+                </p>
+                <button onclick="nextTrial()" style="margin-top: 20px;">Next Trial</button>
+            `;
+            area.appendChild(feedbackDiv);
+        }
+
+        function nextTrial() {
+            currentTrial++;
+            runTrial();
+        }
+
+        function finishExperiment() {
+            showPage('thankYouPage');
+        }
+
+        function calculateSDT(results) {
+            let hits = 0, misses = 0, fas = 0, crs = 0;
+            
+            results.forEach(r => {
+                if (r.hit === 1) hits++;
+                else if (r.miss === 1) misses++;
+                else if (r.falseAlarm === 1) fas++;
+                else if (r.correctRejection === 1) crs++;
+            });
+            
+            // Calculate hit and false alarm rates with correction
+            const hitRate = (hits + 0.5) / (hits + misses + 1);
+            const faRate = (fas + 0.5) / (fas + crs + 1);
+            
+            // Calculate d' (sensitivity)
+            const zHit = inverseNormal(hitRate);
+            const zFA = inverseNormal(faRate);
+            const dPrime = zHit - zFA;
+            
+            // Calculate criterion (c)
+            const criterion = -0.5 * (zHit + zFA);
+            
+            // Calculate bias (beta)
+            const bias = Math.exp(criterion * dPrime);
+            
+            return {
+                hits, misses, fas, crs,
+                hitRate: hitRate.toFixed(4),
+                faRate: faRate.toFixed(4),
+                dPrime: dPrime.toFixed(4),
+                criterion: criterion.toFixed(4),
+                bias: bias.toFixed(4)
+            };
+        }
+
+        function inverseNormal(p) {
+            const a1 = -3.969683028665376e+01;
+            const a2 = 2.209460984245205e+02;
+            const a3 = -2.759285104469687e+02;
+            const a4 = 1.383577518672690e+02;
+            const a5 = -3.066479806614716e+01;
+            const a6 = 2.506628277459239e+00;
+            
+            const b1 = -5.447609879822406e+01;
+            const b2 = 1.615858368580409e+02;
+            const b3 = -1.556989798598866e+02;
+            const b4 = 6.680131188771972e+01;
+            const b5 = -1.328068155288572e+01;
+            
+            const c1 = -7.784894002430293e-03;
+            const c2 = -3.223964580411365e-01;
+            const c3 = -2.400758277161838e+00;
+            const c4 = -2.549732539343734e+00;
+            const c5 = 4.374664141464968e+00;
+            const c6 = 2.938163982698783e+00;
+            
+            const d1 = 7.784695709041462e-03;
+            const d2 = 3.224671290700398e-01;
+            const d3 = 2.445134137142996e+00;
+            const d4 = 3.754408661907416e+00;
+            
+            const pLow = 0.02425;
+            const pHigh = 1 - pLow;
+            
+            if (p < pLow) {
+                const q = Math.sqrt(-2 * Math.log(p));
+                return (((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6) / ((((d1*q+d2)*q+d3)*q+d4)*q+1);
+            } else if (p <= pHigh) {
+                const q = p - 0.5;
+                const r = q * q;
+                return (((((a1*r+a2)*r+a3)*r+a4)*r+a5)*r+a6)*q / (((((b1*r+b2)*r+b3)*r+b4)*r+b5)*r+1);
+            } else {
+                const q = Math.sqrt(-2 * Math.log(1 - p));
+                return -(((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6) / ((((d1*q+d2)*q+d3)*q+d4)*q+1);
+            }
+        }
+
+        function downloadResults() {
+            let csv = 'ESP Card Experiment - Results\n\n';
+            csv += 'Participant Information\n';
+            csv += 'Participant ID,' + participantData.id + '\n';
+            csv += 'Age,' + participantData.age + '\n';
+            csv += 'Gender,' + participantData.gender + '\n';
+            csv += 'ESP Belief,' + participantData.espBelief + '\n';
+            csv += 'Date,' + new Date().toISOString() + '\n';
+            
+            csv += '\nTrial Data\n';
+            csv += 'Trial,ActualColor,ActualSuit,ActualRank,Response,Correct,Confidence,IsSignal,Hit,Miss,FalseAlarm,CorrectRejection,RT\n';
+            
+            trialResults.forEach(r => {
+                csv += `${r.trial},${r.actualColor},${r.actualSuit},${r.actualRank},${r.response},${r.correct},${r.confidence},${r.isSignal},${r.hit},${r.miss},${r.falseAlarm},${r.correctRejection},${r.rt}\n`;
+            });
+            
+            // Overall performance
+            const totalCorrect = trialResults.filter(r => r.correct === 1).length;
+            const accuracy = ((totalCorrect / TOTAL_TRIALS) * 100).toFixed(2);
+            const avgConfidence = (trialResults.reduce((sum, r) => sum + r.confidence, 0) / TOTAL_TRIALS).toFixed(2);
+            const avgRT = (trialResults.reduce((sum, r) => sum + r.rt, 0) / TOTAL_TRIALS).toFixed(0);
+            
+            csv += '\nOverall Performance\n';
+            csv += `Total Correct,${totalCorrect}\n`;
+            csv += `Total Incorrect,${TOTAL_TRIALS - totalCorrect}\n`;
+            csv += `Accuracy,${accuracy}%\n`;
+            csv += `Average Confidence,${avgConfidence}\n`;
+            csv += `Average Response Time,${avgRT} ms\n`;
+            
+            // Signal Detection Theory Analysis
+            const sdt = calculateSDT(trialResults);
+            csv += '\nSignal Detection Theory Analysis\n';
+            csv += `Hits,${sdt.hits}\n`;
+            csv += `Misses,${sdt.misses}\n`;
+            csv += `False Alarms,${sdt.fas}\n`;
+            csv += `Correct Rejections,${sdt.crs}\n`;
+            csv += `Hit Rate,${sdt.hitRate}\n`;
+            csv += `False Alarm Rate,${sdt.faRate}\n`;
+            csv += `d-prime (Sensitivity),${sdt.dPrime}\n`;
+            csv += `Criterion (c),${sdt.criterion}\n`;
+            csv += `Bias (beta),${sdt.bias}\n`;
+            
+            // Confidence calibration
+            csv += '\nConfidence Calibration\n';
+            csv += 'Confidence,Count,Correct,Accuracy\n';
+            for (let conf = 1; conf <= 5; conf++) {
+                const confResults = trialResults.filter(r => r.confidence === conf);
+                const confCorrect = confResults.filter(r => r.correct === 1).length;
+                const confAccuracy = confResults.length > 0 ? 
+                    ((confCorrect / confResults.length) * 100).toFixed(2) : 'N/A';
+                csv += `${conf},${confResults.length},${confCorrect},${confAccuracy}%\n`;
+            }
+            
+            // Confidence by correctness
+            const correctResults = trialResults.filter(r => r.correct === 1);
+            const incorrectResults = trialResults.filter(r => r.correct === 0);
+            const avgConfCorrect = correctResults.length > 0 ? 
+                (correctResults.reduce((sum, r) => sum + r.confidence, 0) / correctResults.length).toFixed(2) : 'N/A';
+            const avgConfIncorrect = incorrectResults.length > 0 ? 
+                (incorrectResults.reduce((sum, r) => sum + r.confidence, 0) / incorrectResults.length).toFixed(2) : 'N/A';
+            
+            csv += '\nConfidence Analysis\n';
+            csv += `Average Confidence (Correct),${avgConfCorrect}\n`;
+            csv += `Average Confidence (Incorrect),${avgConfIncorrect}\n`;
+            
+            // Performance over time (quartiles)
+            csv += '\nPerformance Over Time (Quartiles)\n';
+            csv += 'Quartile,Trials,Correct,Accuracy,AvgConfidence\n';
+            const quartileSize = Math.floor(TOTAL_TRIALS / 4);
+            for (let q = 0; q < 4; q++) {
+                const start = q * quartileSize;
+                const end = q === 3 ? TOTAL_TRIALS : (q + 1) * quartileSize;
+                const quartileResults = trialResults.slice(start, end);
+                const quartileCorrect = quartileResults.filter(r => r.correct === 1).length;
+                const quartileAccuracy = ((quartileCorrect / quartileResults.length) * 100).toFixed(2);
+                const quartileConf = (quartileResults.reduce((sum, r) => sum + r.confidence, 0) / quartileResults.length).toFixed(2);
+                csv += `${q + 1},${start + 1}-${end},${quartileCorrect},${quartileAccuracy}%,${quartileConf}\n`;
+            }
+            
+            // Response bias analysis
+            const redResponses = trialResults.filter(r => r.response === 'RED').length;
+            const blackResponses = trialResults.filter(r => r.response === 'BLACK').length;
+            csv += '\nResponse Bias\n';
+            csv += `Total RED Responses,${redResponses}\n`;
+            csv += `Total BLACK Responses,${blackResponses}\n`;
+            csv += `RED Response Rate,${((redResponses / TOTAL_TRIALS) * 100).toFixed(2)}%\n`;
+            csv += `BLACK Response Rate,${((blackResponses / TOTAL_TRIALS) * 100).toFixed(2)}%\n`;
+            
+            // Statistical significance (binomial test)
+            const expectedCorrect = TOTAL_TRIALS * 0.5;
+            const zScore = (totalCorrect - expectedCorrect) / Math.sqrt(TOTAL_TRIALS * 0.5 * 0.5);
+            const pValue = 2 * (1 - normalCDF(Math.abs(zScore))); // two-tailed
+            
+            csv += '\nStatistical Analysis\n';
+            csv += `Expected Correct (Chance),${expectedCorrect}\n`;
+            csv += `Observed Correct,${totalCorrect}\n`;
+            csv += `Difference from Chance,${totalCorrect - expectedCorrect}\n`;
+            csv += `Z-Score,${zScore.toFixed(4)}\n`;
+            csv += `P-Value (two-tailed),${pValue.toFixed(4)}\n`;
+            csv += `Significant (p < 0.05),${pValue < 0.05 ? 'Yes' : 'No'}\n`;
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ESP_Experiment_${participantData.id}_${Date.now()}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function normalCDF(x) {
+            // Approximation of standard normal CDF
+            const t = 1 / (1 + 0.2316419 * Math.abs(x));
+            const d = 0.3989423 * Math.exp(-x * x / 2);
+            const prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+            return x > 0 ? 1 - prob : prob;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    </script>
+</body>
+</html>
