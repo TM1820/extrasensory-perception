@@ -336,18 +336,17 @@
             <div class="instructions">
                 <h2 style="text-align: center;">Welcome to the ESP Card Experiment</h2>
                 <p class="intro-text">
-                    This study investigates extrasensory perception (ESP) using a scientifically rigorous approach. 
+                    This study investigates if you have extrasensory perception (ESP). 
                     You will attempt to predict the color of playing cards before they are revealed. 
                     This experiment uses Signal Detection Theory to analyze your perceptual sensitivity 
                     and response patterns.
                 </p>
                 <p class="intro-text">
-                    The study takes approximately 15-20 minutes to complete. Your data will help us understand 
-                    the nature of intuitive decision-making and perception beyond normal sensory channels.
+                    Your data will help us understand the nature of intuitive decision-making and perception beyond normal sensory channels.
                 </p>
             </div>
             <div class="centered">
-                <button onclick="showPage('participantPage')">Begin Study</button>
+                <button onclick="showPage('participantPage')">Begin</button>
             </div>
         </div>
 
@@ -356,7 +355,7 @@
             <h1>Participant Information</h1>
             <div class="form-group">
                 <label for="participantId">Participant ID:</label>
-                <input type="text" id="participantId" required placeholder="Enter your ID">
+                <input type="text" id="participantId" required placeholder="Enter your name">
             </div>
             <div class="form-group">
                 <label for="age">Age:</label>
@@ -398,7 +397,7 @@
                     <li>In each trial, a playing card will be selected (face down)</li>
                     <li>Your task: <b>Predict whether the card is RED (Hearts ♥ or Diamonds ♦) or BLACK (Spades ♠ or Clubs ♣)</b></li>
                     <li>Use your intuition, gut feeling, or any method you prefer to make your prediction</li>
-                    <li>After making your prediction, rate your confidence from 1 (not confident) to 5 (very confident)</li>
+                    <b><li style="color: #1f348e;">After making your prediction, rate your confidence from 1 (not confident) to 5 (very confident)</li></b>
                     <li>The card will then be revealed, showing whether you were correct</li>
                 </ul>
                 
@@ -411,11 +410,11 @@
                     <li>You can take short breaks between trials if needed</li>
                 </ul>
                 
-                <h2 style="margin-top: 25px;">Statistical Note:</h2>
+                <!-- <h2 style="margin-top: 25px;">Statistical Note:</h2>
                 <ul>
                     <li>By chance alone, you would be expected to get approximately 50% correct (100 out of 200)</li>
                     <li>We use Signal Detection Theory to analyze sensitivity beyond random guessing</li>
-                </ul>
+                </ul> -->
             </div>
             <div class="centered">
                 <button onclick="startExperiment()">Start Experiment</button>
@@ -864,5 +863,4 @@
         }
     </script>
 </body>
-
 </html>
